@@ -59,10 +59,10 @@ temp_test_data.to_csv(f'{DATA_PATH}/test.csv')
 # init dataset and dataloader
 print('initializing dataset...')
 train_data = data.TabularDataset(path=f'{DATA_PATH}/train.csv', format='csv',  fields={
-    'SentimentText': ('text', TEXT), 'Sentiment': ('labels', LABEL)})
+    'SentimentText': ('text', TEXT), ' Sentiment': ('labels', LABEL)})
 
 test_data = data.TabularDataset(path=f'{DATA_PATH}/test.csv', format='csv',  fields={
-    'SentimentText': ('text', TEXT), 'Sentiment': ('labels', LABEL)})
+    'SentimentText': ('text', TEXT), ' Sentiment': ('labels', LABEL)})
 
 train_data, valid_data = train_data.split(random_state=random.seed(SEED))
 print(f"Number of training examples: {len(train_data)}")
