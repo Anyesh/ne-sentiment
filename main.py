@@ -15,7 +15,7 @@ from transformers import BertModel
 wandb.init(config={"epochs": N_EPOCHS,
                    "batch_size": BATCH_SIZE, "dropout": DROPOUT})
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-bert = BertModel.from_pretrained('bert-base-uncased')
+bert = BertModel.from_pretrained('/spell/tfrecords')
 model = SentimentClassifier(bert,
                             HIDDEN_DIM,
                             OUTPUT_DIM,

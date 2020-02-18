@@ -11,7 +11,7 @@ torch.manual_seed(SEED)
 torch.backends.cudnn.deterministic = True
 
 tokenizer = BertTokenizer(
-    vocab_file='tfrecords/vocab.txt',
+    vocab_file='/spell/nepali_vocab.txt',
 )
 init_token = tokenizer.cls_token
 eos_token = tokenizer.sep_token
