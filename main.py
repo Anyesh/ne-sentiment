@@ -1,0 +1,78 @@
+import torch
+import torch.optim as optim
+import torch.nn as nn
+import time
+from utils import epoch_time
+from train import train
+from evaluate import evaluate
+from model import SentimentClassifier
+from preprocessing import train_iterator, valid_iterator
+import wandb
+from params import *
+from transformers import BertModel
+
+
+wandb.init(config={"epochs": N_EPOCHS,
+                   "batch_size": BATCH_SIZE, "dropout": DROPOUT})
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+bert = BertModel.from_pretrained('bert-base-uncased')
+model = SentimentClassifier(bert,
+                            HIDDEN_DIM,
+                            OUTPUT_DIM,
+                            N_LAYERS,
+                            BIDIRECTIONAL,
+                            DROPOUT)
+
+optimizer = optim.Adam(model.parameters())
+criterion = nn.BCEWithLogitsLoss()
+
+model = model.to(device)
+criterion = criterion.to(device)
+
+
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+print(f'The model has {count_parameters(model):,} trainable parameters')
+
+for name, param in model.named_parameters():
+    if name.startswith('bert'):
+        param.requires_grad = False
+
+print(f'The model has {count_parameters(model):,} trainable parameters')
+
+for name, param in model.named_parameters():
+    if param.requires_grad:
+        print(name)
+
+
+wandb.watch(model)
+
+best_valid_loss = float('inf')
+for epoch in range(N_EPOCHS):
+
+    start_time = time.time()
+
+    train_loss, train_acc = train(model, train_iterator, optimizer, criterion)
+    valid_loss, valid_acc = evaluate(model, valid_iterator, criterion)
+
+    end_time = time.time()
+
+    epoch_mins, epoch_secs = epoch_time(start_time, end_time)
+
+    if valid_loss < best_valid_loss:
+        best_valid_loss = valid_loss
+        torch.save(model.state_dict(), 'sentiment_classifier.pt')
+
+    print(f'Epoch: {epoch+1:02} | Epoch Time: {epoch_mins}m {epoch_secs}s')
+    print(f'\tTrain Loss: {train_loss:.3f} | Train Acc: {train_acc*100:.2f}%')
+    print(f'\t Val. Loss: {valid_loss:.3f} |  Val. Acc: {valid_acc*100:.2f}%')
+    wandb.log({
+        "Epoch": epoch + 1,
+        "Epoch Time": "f{epoch_mins}m {epoch_secs}s",
+        "Train Loss": train_loss,
+        "Train Accuracy": train_acc * 100,
+        "Validation Loss": valid_loss,
+        "Validation Accuracy": valid_acc * 100,
+
+    })
