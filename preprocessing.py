@@ -49,7 +49,7 @@ TEXT = data.Field(batch_first=True,
 LABEL = data.LabelField(dtype=torch.float)
 
 df = pd.read_csv(
-    f'{DATA_PATH}/dataset.csv')
+    f'{DATA_PATH}/ne.csv')
 temp_train_data = df[:int(0.8 * len(df))]  # 80% train
 temp_train_data.to_csv(f'{DATA_PATH}/train.csv')
 temp_test_data = df[int(0.8 * len(df)):]  # 20 % test
